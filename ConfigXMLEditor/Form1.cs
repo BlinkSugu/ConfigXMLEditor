@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using System.Xml.XPath;
 
 namespace ConfigXMLEditor
@@ -25,7 +26,8 @@ namespace ConfigXMLEditor
         string setIni = "";
         string CurDir = "";
         int ConfigFile = 0;
-        int valid = 0;
+        int inXvalid = 0;
+        int outXvalid = 0;
         int chk = 0;
         string[] configs;
         XDocument setxml;
@@ -149,24 +151,24 @@ namespace ConfigXMLEditor
                 if (Path.GetExtension(InputXML) == "")
                 {
                     label_InputVal.Text = "Directory not available or invalid!";
-                    valid = 0;
+                    inXvalid = 0;
                 }
                 else
                 {
                     label_InputVal.Text = "Input file not available or invalid!";
-                    valid = 0;
+                    inXvalid = 0;
                 }
                 
             }
             if (InputXML == "")
             {
                 label_InputVal.Text = "";
-                valid = 0;
+                inXvalid = 0;
             }
             else if (File.Exists(InputXML) || Directory.Exists(InputXML))
             {
                 label_InputVal.Text = "";
-                valid = 1;
+                inXvalid = 1;
             }
         }
 
@@ -176,10 +178,16 @@ namespace ConfigXMLEditor
             if (!(Directory.Exists(OutputXML)))
             {
                 label_OutputVal.Text = "Destination folder not available or invalid!";
+                outXvalid = 0;
+            }
+            else
+            {
+                outXvalid = 1;
             }
             if (OutputXML == "")
             {
                 label_OutputVal.Text = "";
+                outXvalid = 0;
             }
 
         }
@@ -219,11 +227,20 @@ namespace ConfigXMLEditor
 
         private void button_RepAll_Click(object sender, EventArgs e)
         {
-            if(valid == 1)
+            if(inXvalid == 1 && outXvalid == 1)
             {
                 myTrace = new TextWriterTraceListener(OutputXML + "Output.log", "MyListner");
                 myTrace.WriteLine("");
+                var confname = CurDir + comboBox_Config.SelectedItem;
+                var sxml = XDocument.Load(confname).Root;
+                var xmlRepl = sxml.XPathSelectElements("Replace");
+                foreach (var item in xmlRepl)
+                {
+                    var rFind = item.XPathSelectElement("spanFind");
+                    var rRepl = item.XPathSelectElement("spanReplace");
 
+                }
+                
 
                 myTrace.Flush();
             }
