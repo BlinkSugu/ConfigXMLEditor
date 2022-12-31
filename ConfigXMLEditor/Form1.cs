@@ -51,7 +51,7 @@ namespace ConfigXMLEditor
             InitializeConfig();
             ListOutConfig();
             comboBox_Config.SelectedIndex = 0;
-            
+            richTextBox_Result.Text = "Process ready to start!";
         }
 
         private void ListOutConfig()
@@ -168,6 +168,10 @@ namespace ConfigXMLEditor
             else if (File.Exists(InputXML) || Directory.Exists(InputXML))
             {
                 label_InputVal.Text = "";
+                if (!(InputXML.EndsWith("\\")) && !(Path.GetFileNameWithoutExtension(InputXML) == ""))
+                {
+                    InputXML = InputXML + "\\";
+                }
                 inXvalid = 1;
             }
         }
@@ -182,6 +186,11 @@ namespace ConfigXMLEditor
             }
             else
             {
+                label_OutputVal.Text = "";
+                if(!OutputXML.EndsWith("\\"))
+                {
+                    OutputXML = OutputXML + "\\";
+                }
                 outXvalid = 1;
             }
             if (OutputXML == "")
@@ -227,22 +236,56 @@ namespace ConfigXMLEditor
 
         private void button_RepAll_Click(object sender, EventArgs e)
         {
-            if(inXvalid == 1 && outXvalid == 1)
+            MyTraceBox tr1 = new MyTraceBox(richTextBox_Result);
+            Trace.Listeners.Add(tr1);
+            myTrace = new TextWriterTraceListener(OutputXML + "Output.log");
+            Trace.Listeners.Add(myTrace);
+            if (inXvalid == 1 && outXvalid == 1)
             {
-                myTrace = new TextWriterTraceListener(OutputXML + "Output.log", "MyListner");
-                myTrace.WriteLine("");
-                var confname = CurDir + comboBox_Config.SelectedItem;
+                Trace.WriteLine("Batch Replacement started:\n");
+                var confname = CurDir + comboBox_Config.SelectedItem + ".config";
                 var sxml = XDocument.Load(confname).Root;
                 var xmlRepl = sxml.XPathSelectElements("Replace");
-                foreach (var item in xmlRepl)
+                if (!(Path.GetFileNameWithoutExtension(InputXML) == ""))
                 {
-                    var rFind = item.XPathSelectElement("spanFind");
-                    var rRepl = item.XPathSelectElement("spanReplace");
+                    Trace.WriteLine("Process started in " + InputXML);
+                    string inFile = File.ReadAllText(@InputXML);
+                    foreach (var item in xmlRepl)
+                    {
+                        var rFind = item.XPathSelectElement("spanFind").Value;
+                        var rRepl = item.XPathSelectElement("spanReplace").Value;
+                        inFile = inFile.Replace(rFind, rRepl);
+                        Trace.WriteLine("Find value: \"" + rFind + "\"");
+                        Trace.WriteLine("Replace value: \"" + rRepl + "\"\n");
+                    }
+                    File.WriteAllText(OutputXML + Path.GetFileName(InputXML), inFile);
+                }
+                else
+                {
+                    var xfiles = Directory.GetFiles(InputXML);
+                    foreach (var xfile in xfiles)
+                    {
+                        Trace.WriteLine("Process started in " + xfile + "\n");
+                        string inFile = File.ReadAllText(xfile);
+                        foreach (var item in xmlRepl)
+                        {
+                            var rFind = item.XPathSelectElement("spanFind").Value;
+                            var rRepl = item.XPathSelectElement("spanReplace").Value;
+                            inFile = inFile.Replace(rFind, rRepl);
+                            Trace.WriteLine("Find value: \"" + rFind + "\"");
+                            Trace.WriteLine("Replace value: \"" + rRepl + "\"\n");
+                        }
+                        File.WriteAllText(OutputXML + Path.GetFileName(xfile), inFile);
+                    }
 
                 }
-                
-
                 myTrace.Flush();
+                myTrace.Close();
+                MessageBox.Show("Process Completed!", "Info");
+            }
+            else
+            {
+                MessageBox.Show("Provide both the Input and Output locaition and try again!", "Info");
             }
         }
 
@@ -266,10 +309,6 @@ namespace ConfigXMLEditor
             }
         }
 
-        private void richTextBox_Result_TextChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void label_CurDir_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -369,6 +408,37 @@ namespace ConfigXMLEditor
                 }
             }
           
+        }
+    }
+
+    public class MyTraceBox : TraceListener
+    {
+        private TextBoxBase ot;
+
+        public MyTraceBox(TextBoxBase TraceBox)
+        {
+            this.Name = "Trace";
+            this.ot = TraceBox;
+        }
+        public override void Write(string message)
+        {
+            Action append = () =>
+            {
+                ot.AppendText(message);
+            };
+            if (ot.InvokeRequired)
+            {
+                ot.BeginInvoke(append);
+            }
+            else
+            {
+                append();
+            }
+        }
+
+        public override void WriteLine(string message)
+        {
+            Write(message + Environment.NewLine);
         }
     }
 }

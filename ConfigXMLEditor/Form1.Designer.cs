@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.richTextBox_Result = new System.Windows.Forms.RichTextBox();
             this.linkLabel_DeleteConfig = new System.Windows.Forms.LinkLabel();
             this.label_OutputVal = new System.Windows.Forms.Label();
             this.label_InputVal = new System.Windows.Forms.Label();
@@ -38,7 +39,6 @@
             this.comboBox_Config = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.button_RepAll = new System.Windows.Forms.Button();
-            this.richTextBox_Result = new System.Windows.Forms.RichTextBox();
             this.button_Output = new System.Windows.Forms.Button();
             this.button_Input = new System.Windows.Forms.Button();
             this.textBox_Output = new System.Windows.Forms.TextBox();
@@ -55,6 +55,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.richTextBox_Result);
             this.groupBox1.Controls.Add(this.linkLabel_DeleteConfig);
             this.groupBox1.Controls.Add(this.label_OutputVal);
             this.groupBox1.Controls.Add(this.label_InputVal);
@@ -63,7 +64,6 @@
             this.groupBox1.Controls.Add(this.comboBox_Config);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.button_RepAll);
-            this.groupBox1.Controls.Add(this.richTextBox_Result);
             this.groupBox1.Controls.Add(this.button_Output);
             this.groupBox1.Controls.Add(this.button_Input);
             this.groupBox1.Controls.Add(this.textBox_Output);
@@ -76,6 +76,18 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "XML Editor";
+            // 
+            // richTextBox_Result
+            // 
+            this.richTextBox_Result.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.richTextBox_Result.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richTextBox_Result.ForeColor = System.Drawing.Color.Black;
+            this.richTextBox_Result.Location = new System.Drawing.Point(9, 164);
+            this.richTextBox_Result.Name = "richTextBox_Result";
+            this.richTextBox_Result.ReadOnly = true;
+            this.richTextBox_Result.Size = new System.Drawing.Size(770, 256);
+            this.richTextBox_Result.TabIndex = 16;
+            this.richTextBox_Result.Text = "";
             // 
             // linkLabel_DeleteConfig
             // 
@@ -158,18 +170,6 @@
             this.button_RepAll.Text = "Replace All";
             this.button_RepAll.UseVisualStyleBackColor = true;
             this.button_RepAll.Click += new System.EventHandler(this.button_RepAll_Click);
-            // 
-            // richTextBox_Result
-            // 
-            this.richTextBox_Result.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.richTextBox_Result.ForeColor = System.Drawing.Color.Lime;
-            this.richTextBox_Result.Location = new System.Drawing.Point(6, 166);
-            this.richTextBox_Result.Name = "richTextBox_Result";
-            this.richTextBox_Result.ReadOnly = true;
-            this.richTextBox_Result.Size = new System.Drawing.Size(773, 250);
-            this.richTextBox_Result.TabIndex = 6;
-            this.richTextBox_Result.Text = "Here you can see the current progress update.";
-            this.richTextBox_Result.TextChanged += new System.EventHandler(this.richTextBox_Result_TextChanged);
             // 
             // button_Output
             // 
@@ -258,7 +258,7 @@
             // 
             this.button_ResetIni.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button_ResetIni.BackgroundImage")));
             this.button_ResetIni.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.button_ResetIni.Location = new System.Drawing.Point(758, 438);
+            this.button_ResetIni.Location = new System.Drawing.Point(756, 5);
             this.button_ResetIni.Name = "button_ResetIni";
             this.button_ResetIni.Size = new System.Drawing.Size(33, 28);
             this.button_ResetIni.TabIndex = 16;
@@ -274,6 +274,8 @@
             this.Controls.Add(this.label_CurDir);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.groupBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Config XML Editor";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -297,7 +299,6 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog_InputFolder;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button_RepAll;
-        private System.Windows.Forms.RichTextBox richTextBox_Result;
         private System.Windows.Forms.LinkLabel linkLabel_AddConfig;
         private System.Windows.Forms.LinkLabel linkLabel_OpenConfig;
         private System.Windows.Forms.ComboBox comboBox_Config;
@@ -307,6 +308,7 @@
         private System.Windows.Forms.LinkLabel label_CurDir;
         private System.Windows.Forms.LinkLabel linkLabel_DeleteConfig;
         private System.Windows.Forms.Button button_ResetIni;
+        private System.Windows.Forms.RichTextBox richTextBox_Result;
     }
 }
 
