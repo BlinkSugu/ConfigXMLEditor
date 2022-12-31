@@ -1,0 +1,357 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.XPath;
+
+namespace ConfigXMLEditor
+{
+    public partial class Form1 : Form
+    {
+        string InputXML = "";
+        string OutputXML = "";
+        string setIni = "";
+        string CurDir = "";
+        int ConfigFile = 0;
+        int valid = 0;
+        int chk = 0;
+        string[] configs;
+        XDocument setxml;
+        XElement setroot;
+        TextWriterTraceListener myTrace;
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            label_InputVal.Text = "";
+            label_OutputVal.Text = "";
+            InitialCheck("D");
+            if(chk == 0)
+            {
+                InitialCheck("C");
+            }
+            InitializeConfig();
+            ListOutConfig();
+            comboBox_Config.SelectedIndex = 0;
+            
+        }
+
+        private void ListOutConfig()
+        {
+            comboBox_Config.Items.Clear();
+            foreach (var item in setroot.XPathSelectElements("//ConfigList/config"))
+            {
+                comboBox_Config.Items.Add(Path.GetFileNameWithoutExtension(item.Value));
+            }
+        }
+        private void InitializeConfig()
+        {
+            if (!File.Exists(CurDir + "settings.ini"))
+            {
+                configs = Directory.GetFiles(CurDir, "*.config");
+                setxml = new XDocument();
+                setxml.AddFirst(new XElement("ConfigXml", new XComment("Don't try to delete the first two default configs!")));
+                setroot = setxml.Root;
+                setroot.Add(new XElement("ConfigList"));
+                foreach (var item in configs)
+                {
+                    setroot.XPathSelectElement("ConfigList").Add(new XElement("config", Path.GetFileName(item)));
+                }
+                setxml.Save(CurDir + "settings.ini");
+                setIni = CurDir + "settings.ini";
+            }
+            else
+            {
+                try
+                {
+                    setxml = XDocument.Load(CurDir + "settings.ini", LoadOptions.None);
+                    setroot = setxml.Root;
+                    setIni = CurDir + "settings.ini";
+                }
+                catch (Exception)
+                {
+                    if (MessageBox.Show("Settings.ini invalid! Are you sure want to reset it?", "Warning!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        File.Delete(CurDir + "settings.ini");
+                        InitializeConfig();
+                    }
+                    else
+                    {
+                        Environment.Exit(0);
+                    }
+                }
+               
+            }
+        }
+
+        private void ResetConfig()
+        {
+            File.Delete(CurDir + "settings.ini");
+            configs = Directory.GetFiles(CurDir, "*.config");
+            setxml = new XDocument();
+            setxml.AddFirst(new XElement("ConfigXml", new XComment("Don't try to delete the first two default configs!")));
+            setroot = setxml.Root;
+            setroot.Add(new XElement("ConfigList"));
+            foreach (var item in configs)
+            {
+                setroot.XPathSelectElement("ConfigList").Add(new XElement("config", Path.GetFileName(item)));
+            }
+            setxml.Save(CurDir + "settings.ini");
+            setIni = CurDir + "settings.ini";
+        }
+
+        private void InitialCheck(string drLet)
+        {
+            if (Directory.Exists(drLet + ":\\"))
+            {
+                if (Directory.Exists(drLet + ":\\Config-Editor"))
+                {
+                    FileTestNCreater(drLet + ":\\Config-Editor\\Pre_Cleanup.config");
+                    FileTestNCreater(drLet + ":\\Config-Editor\\Final_Updates.config");
+                }
+                else
+                {
+                    DirTestNCreater(drLet + ":\\Config-Editor");
+                    FileTestNCreater(drLet + ":\\Config-Editor\\Pre_Cleanup.config");
+                    FileTestNCreater(drLet + ":\\Config-Editor\\Final_Updates.config");
+                }
+                CurDir = drLet + ":\\Config-Editor\\";
+                label_CurDir.Text = CurDir;
+                chk = 1;
+            }
+            else
+            {
+                MessageBox.Show("C or D drive not exist!");
+            }
+        }
+
+        private void textBox_Input_TextChanged(object sender, EventArgs e)
+        {
+            InputXML = textBox_Input.Text;
+            if (!(File.Exists(InputXML)) && !(InputXML == "") && !(Directory.Exists(InputXML)))
+            {
+                if (Path.GetExtension(InputXML) == "")
+                {
+                    label_InputVal.Text = "Directory not available or invalid!";
+                    valid = 0;
+                }
+                else
+                {
+                    label_InputVal.Text = "Input file not available or invalid!";
+                    valid = 0;
+                }
+                
+            }
+            if (InputXML == "")
+            {
+                label_InputVal.Text = "";
+                valid = 0;
+            }
+            else if (File.Exists(InputXML) || Directory.Exists(InputXML))
+            {
+                label_InputVal.Text = "";
+                valid = 1;
+            }
+        }
+
+        private void textBox_Output_TextChanged(object sender, EventArgs e)
+        {
+            OutputXML = textBox_Output.Text;
+            if (!(Directory.Exists(OutputXML)))
+            {
+                label_OutputVal.Text = "Destination folder not available or invalid!";
+            }
+            if (OutputXML == "")
+            {
+                label_OutputVal.Text = "";
+            }
+
+        }
+
+        private void comboBox_Config_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ConfigFile = comboBox_Config.SelectedIndex;
+        }
+
+        private void button_Input_MouseClick(object sender, MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.Right)
+            {
+                if (folderBrowserDialog_InputFolder.ShowDialog() == DialogResult.OK)
+                {
+                    textBox_Input.Text = folderBrowserDialog_InputFolder.SelectedPath;
+                }
+
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                if (openFileDialog_Input.ShowDialog() == DialogResult.OK)
+                {
+                    textBox_Input.Text = openFileDialog_Input.FileName;
+                }
+            }
+        }
+
+        private void button_Input_Click(object sender, EventArgs e)
+        {  
+            if (openFileDialog_Input.ShowDialog() == DialogResult.OK)
+            {
+                    textBox_Input.Text = openFileDialog_Input.FileName;
+            }
+           
+        }
+
+        private void button_RepAll_Click(object sender, EventArgs e)
+        {
+            if(valid == 1)
+            {
+                myTrace = new TextWriterTraceListener(OutputXML + "Output.log", "MyListner");
+                myTrace.WriteLine("");
+
+
+                myTrace.Flush();
+            }
+        }
+
+        private void FileTestNCreater(string FileName)
+        {
+            if (!File.Exists(FileName))
+            {
+                var nfile = new XDocument();
+                nfile.AddFirst(new XElement("Config", new XComment(Path.GetFileNameWithoutExtension(FileName) + " config starts here")));
+                var nfilevalue = nfile.Root;
+                nfilevalue.Add(new XElement("Replace", new XElement("spanFind", "Find"), new XElement("spanReplace", "Replace")));
+                nfile.Save(FileName);
+            }
+        }
+
+        private void DirTestNCreater(string DirName)
+        {
+            if (!Directory.Exists(DirName))
+            {
+                Directory.CreateDirectory(DirName);
+            }
+        }
+
+        private void richTextBox_Result_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label_CurDir_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(CurDir);
+        }
+
+        private void linkLabel_OpenConfig_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(CurDir + comboBox_Config.SelectedItem + ".config");
+        }
+
+        private void linkLabel_AddConfig_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var configs = setroot.XPathSelectElements("ConfigList/config");
+            var newItem = comboBox_Config.Text;
+            var isval = 0;
+            if (Regex.IsMatch(newItem, "^[a-zA-Z0-9_]*$"))
+            {
+                isval = 1;
+            }
+            var isExist = 0;
+            foreach (var item in configs)
+            {
+                if (item.Value.Equals(newItem + ".config"))
+                {
+                    isExist = 1;
+                    break;
+                }
+            }
+            if (isExist == 0 && isval == 1 && !(newItem == "") && !(newItem == "Select") && !(newItem == "select"))
+            {
+                setroot.XPathSelectElement("ConfigList").Add(new XElement("config", comboBox_Config.Text + ".config"));
+                setxml.Save(CurDir + "settings.ini");
+                FileTestNCreater(CurDir + newItem + ".config");
+                ListOutConfig();
+                comboBox_Config.Text = "Select";
+                MessageBox.Show("Config \"" + newItem + "\" Added!", "Info");
+            }
+            else if (newItem == "" || newItem == "Select" || newItem == "select")
+            {
+                MessageBox.Show("Please type a valid config file name and then click \"Add\"!", "Error");
+            }
+            else if (isval == 0)
+            {
+                MessageBox.Show("Only use Alphanumeric and Underscores!", "Error");
+            }
+            else
+            {
+                MessageBox.Show("Config \"" + newItem + "\" already avaialble!", "Error");
+            }
+        }
+
+        private void button_ResetIni_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure want to reset the \"settings.ini\"?", "Warning!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                File.Delete(CurDir + "settings.ini");
+                InitialCheck("D");
+                if (chk == 0)
+                {
+                    InitialCheck("C");
+                }
+                InitializeConfig();
+                ListOutConfig();
+                MessageBox.Show("Settings.ini reinitialized!", "Info");
+            }
+        }
+
+        private void comboBox_Config_TextUpdate(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void linkLabel_DeleteConfig_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (MessageBox.Show("Are you sure want to delete the \"" + comboBox_Config.Text + "\"?", "Warning!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                setroot = setxml.Root;
+                var configs = setroot.XPathSelectElements("ConfigList/config");
+
+                foreach (var config in configs)
+                {
+                    if (config.Value == comboBox_Config.Text + ".config" && !(comboBox_Config.Text == "Select") && !(comboBox_Config.Text == "select"))
+                    {
+                        File.Delete(CurDir + config.Value);
+                        config.Remove();
+                        setxml.Save(CurDir + "settings.ini");
+                        ListOutConfig();
+                        MessageBox.Show("Config \"" + comboBox_Config.Text + "\" deleted!", "Info");
+                        comboBox_Config.Text = "Select";
+                        break;
+                    }
+                    else if (comboBox_Config.Text == "" || comboBox_Config.Text == "Select" || comboBox_Config.Text == "select")
+                    {
+                        MessageBox.Show("Please select a valid config file name and then click \"Delete\"!", "Error");
+                    }
+                }
+            }
+          
+        }
+    }
+}
