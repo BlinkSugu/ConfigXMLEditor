@@ -80,7 +80,7 @@
             // richTextBox_Result
             // 
             this.richTextBox_Result.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
-            this.richTextBox_Result.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richTextBox_Result.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richTextBox_Result.ForeColor = System.Drawing.Color.Black;
             this.richTextBox_Result.Location = new System.Drawing.Point(9, 164);
             this.richTextBox_Result.Name = "richTextBox_Result";

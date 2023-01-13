@@ -41,6 +41,8 @@ namespace ConfigXMLEditor
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            textBox_Input.Text = "D:\\in\\9780192848635_Parpworth.xml";
+            textBox_Output.Text = "D:\\out";
             label_InputVal.Text = "";
             label_OutputVal.Text = "";
             InitialCheck("D");
@@ -52,6 +54,11 @@ namespace ConfigXMLEditor
             ListOutConfig();
             comboBox_Config.SelectedIndex = 0;
             richTextBox_Result.Text = "Process ready to start!";
+            MyTraceBox tr1 = new MyTraceBox(richTextBox_Result);
+            Trace.Listeners.Add(tr1);
+            myTrace = new TextWriterTraceListener(OutputXML + "Output.log");
+            Trace.Listeners.Add(myTrace);
+
         }
 
         private void ListOutConfig()
@@ -168,7 +175,7 @@ namespace ConfigXMLEditor
             else if (File.Exists(InputXML) || Directory.Exists(InputXML))
             {
                 label_InputVal.Text = "";
-                if (!(InputXML.EndsWith("\\")) && !(Path.GetFileNameWithoutExtension(InputXML) == ""))
+                if (!(InputXML.EndsWith("\\")) && Path.GetExtension(InputXML) == "")
                 {
                     InputXML = InputXML + "\\";
                 }
@@ -236,27 +243,34 @@ namespace ConfigXMLEditor
 
         private void button_RepAll_Click(object sender, EventArgs e)
         {
-            MyTraceBox tr1 = new MyTraceBox(richTextBox_Result);
-            Trace.Listeners.Add(tr1);
-            myTrace = new TextWriterTraceListener(OutputXML + "Output.log");
-            Trace.Listeners.Add(myTrace);
             if (inXvalid == 1 && outXvalid == 1)
             {
-                Trace.WriteLine("Batch Replacement started:\n");
+                richTextBox_Result.Text = "";
+                Trace.WriteLine("Batch replacement started:\n");
                 var confname = CurDir + comboBox_Config.SelectedItem + ".config";
-                var sxml = XDocument.Load(confname).Root;
-                var xmlRepl = sxml.XPathSelectElements("Replace");
-                if (!(Path.GetFileNameWithoutExtension(InputXML) == ""))
+                var sxml = File.ReadAllText(confname);
+                var xmlfindmths = Regex.Matches(sxml, "<spanFind>(.+)</spanFind>");
+                var xmlreplmths = Regex.Matches(sxml, "<spanReplace>(.+)</spanReplace>");
+
+                var xmlfind = xmlfindmths.Cast<Match>().Select(match => Regex.Replace(match.Value, "<spanFind>(.+)</spanFind>", "$1")).ToList();
+                var xmlrepl = xmlreplmths.Cast<Match>().Select(match => Regex.Replace(match.Value, "<spanReplace>(.+)</spanReplace>", "$1")).ToList();
+
+                var replcnt = xmlfind.Count;
+
+                if (!(Path.GetExtension(InputXML) == ""))
                 {
-                    Trace.WriteLine("Process started in " + InputXML);
+                    Trace.WriteLine("Process started in " + InputXML + ":\n");
                     string inFile = File.ReadAllText(@InputXML);
-                    foreach (var item in xmlRepl)
+
+                    for(var i=0; i<replcnt; i++)
                     {
-                        var rFind = item.XPathSelectElement("spanFind").Value;
-                        var rRepl = item.XPathSelectElement("spanReplace").Value;
+                        var rFind = xmlfind[i];
+                        var rRepl = xmlrepl[i];
+                        var rCnt = Regex.Matches(inFile, rFind).Count;
                         inFile = inFile.Replace(rFind, rRepl);
                         Trace.WriteLine("Find value: \"" + rFind + "\"");
-                        Trace.WriteLine("Replace value: \"" + rRepl + "\"\n");
+                        Trace.WriteLine("Replace value: \"" + rRepl + "\"");
+                        Trace.WriteLine("Occurrence replaced: \"" + rCnt + "\"\n");
                     }
                     File.WriteAllText(OutputXML + Path.GetFileName(InputXML), inFile);
                 }
@@ -265,22 +279,27 @@ namespace ConfigXMLEditor
                     var xfiles = Directory.GetFiles(InputXML);
                     foreach (var xfile in xfiles)
                     {
-                        Trace.WriteLine("Process started in " + xfile + "\n");
+                        Trace.WriteLine("Process started in " + xfile + ":\n");
                         string inFile = File.ReadAllText(xfile);
-                        foreach (var item in xmlRepl)
+                        for (var i = 0; i < replcnt; i++)
                         {
-                            var rFind = item.XPathSelectElement("spanFind").Value;
-                            var rRepl = item.XPathSelectElement("spanReplace").Value;
+                            var rFind = xmlfind[i];
+                            var rRepl = xmlrepl[i];
+                            var rCnt = Regex.Matches(inFile, rFind).Count;
                             inFile = inFile.Replace(rFind, rRepl);
                             Trace.WriteLine("Find value: \"" + rFind + "\"");
-                            Trace.WriteLine("Replace value: \"" + rRepl + "\"\n");
+                            Trace.WriteLine("Replace value: \"" + rRepl + "\"");
+                            Trace.WriteLine("Occurrence replaced: \"" + rCnt + "\"\n");
                         }
                         File.WriteAllText(OutputXML + Path.GetFileName(xfile), inFile);
                     }
 
                 }
-                myTrace.Flush();
-                myTrace.Close();
+                Trace.WriteLine("Batch replacement completed!");
+                Trace.WriteLine("____________________________________________________________");
+                Trace.WriteLine("____________________________________________________________\n\n");
+                Trace.Flush();
+                Trace.Close();
                 MessageBox.Show("Process Completed!", "Info");
             }
             else
@@ -409,6 +428,8 @@ namespace ConfigXMLEditor
             }
           
         }
+
+
     }
 
     public class MyTraceBox : TraceListener
