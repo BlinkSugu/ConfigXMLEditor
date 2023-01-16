@@ -46,7 +46,7 @@ namespace ConfigXMLEditor
             label_InputVal.Text = "";
             label_OutputVal.Text = "";
             InitialCheck("D");
-            if(chk == 0)
+            if (chk == 0)
             {
                 InitialCheck("C");
             }
@@ -105,7 +105,7 @@ namespace ConfigXMLEditor
                         Environment.Exit(0);
                     }
                 }
-               
+
             }
         }
 
@@ -165,7 +165,7 @@ namespace ConfigXMLEditor
                     label_InputVal.Text = "Input file not available or invalid!";
                     inXvalid = 0;
                 }
-                
+
             }
             if (InputXML == "")
             {
@@ -194,12 +194,11 @@ namespace ConfigXMLEditor
             else
             {
                 label_OutputVal.Text = "";
-                if(!OutputXML.EndsWith("\\"))
+                if (!OutputXML.EndsWith("\\"))
                 {
                     OutputXML = OutputXML + "\\";
                 }
-                outXvalid = 1;
-            }
+                outXvalid = 1;            }
             if (OutputXML == "")
             {
                 label_OutputVal.Text = "";
@@ -213,32 +212,13 @@ namespace ConfigXMLEditor
             ConfigFile = comboBox_Config.SelectedIndex;
         }
 
-        private void button_Input_MouseClick(object sender, MouseEventArgs e)
-        {
-            if(e.Button == MouseButtons.Right)
-            {
-                if (folderBrowserDialog_InputFolder.ShowDialog() == DialogResult.OK)
-                {
-                    textBox_Input.Text = folderBrowserDialog_InputFolder.SelectedPath;
-                }
-
-            }
-            else if (e.Button == MouseButtons.Left)
-            {
-                if (openFileDialog_Input.ShowDialog() == DialogResult.OK)
-                {
-                    textBox_Input.Text = openFileDialog_Input.FileName;
-                }
-            }
-        }
-
         private void button_Input_Click(object sender, EventArgs e)
-        {  
+        {
             if (openFileDialog_Input.ShowDialog() == DialogResult.OK)
             {
-                    textBox_Input.Text = openFileDialog_Input.FileName;
+                textBox_Input.Text = openFileDialog_Input.FileName;
             }
-           
+
         }
 
         private void button_RepAll_Click(object sender, EventArgs e)
@@ -262,7 +242,7 @@ namespace ConfigXMLEditor
                     Trace.WriteLine("Process started in " + InputXML + ":\n");
                     string inFile = File.ReadAllText(@InputXML);
 
-                    for(var i=0; i<replcnt; i++)
+                    for (var i = 0; i < replcnt; i++)
                     {
                         var rFind = xmlfind[i];
                         var rRepl = xmlrepl[i];
@@ -376,7 +356,7 @@ namespace ConfigXMLEditor
             }
             else
             {
-                MessageBox.Show("Config \"" + newItem + "\" already avaialble!", "Error");
+                MessageBox.Show("Config \"" + newItem + "\" already avaialble! \nPlease try with any other name!", "Error");
             }
         }
 
@@ -398,12 +378,12 @@ namespace ConfigXMLEditor
 
         private void comboBox_Config_TextUpdate(object sender, EventArgs e)
         {
-            
+
         }
 
         private void linkLabel_DeleteConfig_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (MessageBox.Show("Are you sure want to delete the \"" + comboBox_Config.Text + "\"?", "Warning!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            if (MessageBox.Show("Are you sure want to delete the \"" + comboBox_Config.Text + "\" config?", "Warning!", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
                 setroot = setxml.Root;
                 var configs = setroot.XPathSelectElements("ConfigList/config");
@@ -426,10 +406,46 @@ namespace ConfigXMLEditor
                     }
                 }
             }
-          
+
         }
 
 
+        private void button_RepAll_MouseLeave(object sender, EventArgs e)
+        {
+            button_RepAll.BackColor = Color.HotPink;
+        }
+
+        private void button_RepAll_MouseEnter(object sender, EventArgs e)
+        {
+            button_RepAll.BackColor = Color.DeepPink;
+        }
+
+        private void button_Output_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog_OutputFolder.ShowDialog() == DialogResult.OK)
+            {
+                textBox_Output.Text = folderBrowserDialog_OutputFolder.SelectedPath;
+            }
+        }
+
+        private void button_Input_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (folderBrowserDialog_InputFolder.ShowDialog() == DialogResult.OK)
+                {
+                    textBox_Input.Text = folderBrowserDialog_InputFolder.SelectedPath;
+                }
+
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                if (openFileDialog_Input.ShowDialog() == DialogResult.OK)
+                {
+                    textBox_Input.Text = openFileDialog_Input.FileName;
+                }
+            }
+        }
     }
 
     public class MyTraceBox : TraceListener
