@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -23,9 +24,8 @@ namespace ConfigXMLEditor
     {
         string InputXML = "";
         string OutputXML = "";
-        string setIni = "";
+        //string setIni = "";
         string CurDir = "";
-        int ConfigFile = 0;
         int inXvalid = 0;
         int outXvalid = 0;
         int chk = 0;
@@ -53,11 +53,13 @@ namespace ConfigXMLEditor
             InitializeConfig();
             ListOutConfig();
             comboBox_Config.SelectedIndex = 0;
+            comboBox_RegEx.SelectedIndex = 0;
             richTextBox_Result.Text = "Process ready to start!";
             MyTraceBox tr1 = new MyTraceBox(richTextBox_Result);
             Trace.Listeners.Add(tr1);
             myTrace = new TextWriterTraceListener(OutputXML + "Output.log");
             Trace.Listeners.Add(myTrace);
+            label_EditorTrigger.Visible = false;
 
         }
 
@@ -83,7 +85,7 @@ namespace ConfigXMLEditor
                     setroot.XPathSelectElement("ConfigList").Add(new XElement("config", Path.GetFileName(item)));
                 }
                 setxml.Save(CurDir + "settings.ini");
-                setIni = CurDir + "settings.ini";
+                //setIni = CurDir + "settings.ini";
             }
             else
             {
@@ -91,7 +93,7 @@ namespace ConfigXMLEditor
                 {
                     setxml = XDocument.Load(CurDir + "settings.ini", LoadOptions.None);
                     setroot = setxml.Root;
-                    setIni = CurDir + "settings.ini";
+                    //setIni = CurDir + "settings.ini";
                 }
                 catch (Exception)
                 {
@@ -122,7 +124,7 @@ namespace ConfigXMLEditor
                 setroot.XPathSelectElement("ConfigList").Add(new XElement("config", Path.GetFileName(item)));
             }
             setxml.Save(CurDir + "settings.ini");
-            setIni = CurDir + "settings.ini";
+            //setIni = CurDir + "settings.ini";
         }
 
         private void InitialCheck(string drLet)
@@ -141,7 +143,7 @@ namespace ConfigXMLEditor
                     FileTestNCreater(drLet + ":\\Config-Editor\\Final_Updates.config");
                 }
                 CurDir = drLet + ":\\Config-Editor\\";
-                label_CurDir.Text = CurDir;
+                linkLabel_CurDir.Text = CurDir;
                 chk = 1;
             }
             else
@@ -157,12 +159,16 @@ namespace ConfigXMLEditor
             {
                 if (Path.GetExtension(InputXML) == "")
                 {
+                    label_EditorTrigger.Visible = false;
                     label_InputVal.Text = "Directory not available or invalid!";
+                    tableLayoutPanel1.Controls.Add(label_EditorTrigger, 1, 1);
                     inXvalid = 0;
                 }
                 else
                 {
+                    label_EditorTrigger.Visible = false;
                     label_InputVal.Text = "Input file not available or invalid!";
+                    tableLayoutPanel1.Controls.Add(label_EditorTrigger, 1, 1);
                     inXvalid = 0;
                 }
 
@@ -178,6 +184,10 @@ namespace ConfigXMLEditor
                 if (!(InputXML.EndsWith("\\")) && Path.GetExtension(InputXML) == "")
                 {
                     InputXML = InputXML + "\\";
+                }
+                else
+                {
+                    label_EditorTrigger.Visible = true;
                 }
                 inXvalid = 1;
             }
@@ -207,10 +217,6 @@ namespace ConfigXMLEditor
 
         }
 
-        private void comboBox_Config_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ConfigFile = comboBox_Config.SelectedIndex;
-        }
 
         private void button_Input_Click(object sender, EventArgs e)
         {
@@ -309,11 +315,6 @@ namespace ConfigXMLEditor
         }
 
 
-        private void label_CurDir_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start(CurDir);
-        }
-
         private void linkLabel_OpenConfig_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start(CurDir + comboBox_Config.SelectedItem + ".config");
@@ -376,10 +377,6 @@ namespace ConfigXMLEditor
             }
         }
 
-        private void comboBox_Config_TextUpdate(object sender, EventArgs e)
-        {
-
-        }
 
         private void linkLabel_DeleteConfig_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -444,6 +441,46 @@ namespace ConfigXMLEditor
                 {
                     textBox_Input.Text = openFileDialog_Input.FileName;
                 }
+            }
+        }
+
+        private void linkLabel_CurDir_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(CurDir);
+        }
+
+
+        int cheight = 0;
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (richTextBox_Result.Visible == false)
+            {
+                richTextBox_Result.Visible = true;
+                button_RichVisibility.BackgroundImage = ConfigXMLEditor.Properties.Resources.uparrow;
+                this.MinimumSize = new Size((760 / 5) * 4, (300 / 5) * 4);
+                this.Height = cheight;
+            }
+            else
+            {
+                richTextBox_Result.Visible = false;
+                button_RichVisibility.BackgroundImage = ConfigXMLEditor.Properties.Resources.downarrow;
+                cheight = this.Height;
+                this.MinimumSize = new Size((760/5)*4, (270 / 5) * 4);
+                this.Height = (270 / 5) * 4;
+            }
+                
+        }
+
+
+
+        private void textBox_Input_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.E | e.Alt)
+            {
+                Form1 frm1 = new Form1();
+                frm1.Hide();
+                Form2 frm2 = new Form2(InputXML);
+                frm2.ShowDialog();
             }
         }
     }
